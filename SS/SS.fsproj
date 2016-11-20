@@ -48,7 +48,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Utils.fs" />
     <Compile Include="Program.fs" />
+    <Compile Include="Useless.fs" />
+    <Compile Include="Main.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <PropertyGroup>

@@ -1,67 +1,44 @@
-﻿open System
-open System.Linq
+﻿module Program
+open System
+open Utils
 
-type SystemBase = BIN | OCT | DEC | HEX
+//BASE <-> DEC
 
-let stringToList (s:string) = s.ToList() |> Seq.map Char.ToString |> Seq.toList 
-
-let listStringToInt n = match n with 
-    | [] -> 0 
-    | _ -> String.concat "" n |> Int32.Parse
-
-//BIN <-> DEC
-
-let rec _decToBin t n = 
-    if n / 2 > 0 || n % 2 > 0
-    then (_decToBin ((n%2).ToString() :: t) (n/2)) 
-    else t 
-
-let decToBin:(string list -> string list) = 
-    String.concat "" 
-    >> Int32.Parse 
-    >> _decToBin []  
+let symbols = ["0";"1";"2";"3";"4";"5";"6";"7";"8";"9";
+                "A";"B";"C";"D";"E";"F";]
 
 let baseToDec b (n:string list) = match n with
     | [] -> []
-    | _ -> List.map2 (fun p d -> (Int32.Parse d) * (pown b p)) [0..(List.length n) - 1] (List.rev n)
+    | _ -> List.map2 (fun p d -> (Seq.findIndex ((=) d) symbols) * (pown b p)) [0..(List.length n) - 1] (List.rev n)
         |> List.reduce (+)
         |> fun x -> x.ToString() 
         |> stringToList
 
-let binToDec = baseToDec 2
-
-//OCT <-> DEC
-
-let octToDec = baseToDec 8
-
-let rec _decToOct t n = 
-    if n / 8 > 0 || n % 8 > 0
-    then (_decToOct ((n%8).ToString() :: t) (n/8)) 
+let rec  _decToBase b t n = 
+    if n / b > 0 || n % b > 0
+    then (_decToBase b (List.item (n%b) symbols :: t) (n/b)) 
     else t 
 
-let decToOct:(string list -> string list) = 
-    String.concat "" 
-    >> Int32.Parse
-    >> _decToOct []  
+let decToBase b (n:string list) = _decToBase b [] (listStringToInt n)
 
-//BIN <-> OCT
 
-let rec group size fill (acc:string list list) (n:string list) = 
-    if List.length n < size then (n@(List.replicate (size - (List.length n)) fill)) :: acc
-    else group size fill ((List.take size n) :: acc) (List.skip size n)
+let remBaseToDec (b:int) (n:string list) = match n with
+    | [] -> 0.0
+    | _ -> List.map2 (fun p d -> (float (Seq.findIndex ((=) d) symbols)) *  ((float b) ** (float (p * (-1))))) [1 .. (List.length n)] n
+        |> List.reduce (+)
 
-let binToOctTriads = 
-    List.rev
-    >> group 3 "0" []
-    >> List.map List.rev
-    >> List.map binToDec
-    >> List.concat
 
-let octToBinTriads = List.map (stringToList >> decToBin >> String.concat "")
+let rec _decToBaseRem (t:string list) (b:float) (r:int) (n:float)  = 
+    let x = n * b
+    let top = Seq.item (Math.Floor x |> int) symbols
+    if r = 0 then Seq.rev t
+    else (_decToBaseRem (top :: t) b (r - 1) (x % 1.0) )
+
+let decToBaseRem = _decToBaseRem []
 
 let test verbose (f1:string list -> string list) (f2:string list -> string list) n = 
     [ 1..n ]
-    |> List.map (fun x -> x.ToString() |> stringToList)
+    |> List.map intToStringList
     |> List.map f1
     |> List.map f2
     |> List.map listStringToInt
@@ -69,13 +46,9 @@ let test verbose (f1:string list -> string list) (f2:string list -> string list)
     |> List.map2 (=) [1..n]
     |> List.reduce (&&)
 
+let convertFun a b = (baseToDec a) >> (decToBase b) >> String.concat ""
 
-[<EntryPoint>]
-let main argv = 
-    List.map (fun x -> x.ToString() |> stringToList |> decToOct |> octToBinTriads ) [1..100]
-    |> printfn "%A"
-    Console.ReadLine() 
-    |> ignore   
-    0
+let convertFunRem a b r = (remBaseToDec a) >> (decToBaseRem b r) >> String.concat ""
+
 
 
