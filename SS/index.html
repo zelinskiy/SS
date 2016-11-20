@@ -1,0 +1,62 @@
+﻿<html>
+<head>
+    
+</head>
+<body>
+<script>
+    
+    function httpGet(theUrl) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", theUrl, false);
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+
+    function main() {
+        var n = document.getElementById("n").value;
+        
+        if (n.indexOf(".") === -1) {
+            n = n + ".0";
+        } 
+        var b1 = document.getElementById("b1").value;
+        var b2 = document.getElementById("b2").value;
+        if (!isCorrect(n, b1)) {
+            document.getElementById("result").innerHTML = "incorrect data";
+            return;
+        }
+        var url = "./convert/" + b1 + "/" + b2 + "/" + n;
+        var res = httpGet(url);
+        document.getElementById("result").innerHTML = res;
+        console.log(res);
+    }
+
+    function isCorrect(n, b) {
+        var symbols = ".0123456789ABCDEF";
+        for (var i = 0; i < n.length; i++) {
+            var index = symbols.indexOf(n[i]);
+            if (index < 0 || index > b) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+</script>
+    
+<center>
+    <br/>
+    <br/>
+    <h1>Convert</h1>
+    <br />
+    <p>
+        NUMBER <input id="n" type="text"/>
+    </p>
+    <p>
+        FROM <input id="b1" type="number"/> TO <input id="b2" type="number"/>
+    </p>
+    <button onclick="main()">CONVERT</button>
+    <p>RESULT:</p>
+    <p id="result"></p>
+</center>
+</body>
+</html>

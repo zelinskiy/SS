@@ -1,11 +1,12 @@
 ﻿module Program
 open System
+open System.Linq
 open Utils
 
 //BASE <-> DEC
 
 let symbols = ["0";"1";"2";"3";"4";"5";"6";"7";"8";"9";
-                "A";"B";"C";"D";"E";"F";]
+                "A";"B";"C";"D";"E";"F"]
 
 let baseToDec b (n:string list) = match n with
     | [] -> []
@@ -16,11 +17,12 @@ let baseToDec b (n:string list) = match n with
 
 let rec  _decToBase b t n = 
     if n / b > 0 || n % b > 0
-    then (_decToBase b (List.item (n%b) symbols :: t) (n/b)) 
+    then (_decToBase b (symbols.[n % b] :: t) (n/b)) 
     else t 
 
 let decToBase b (n:string list) = _decToBase b [] (listStringToInt n)
 
+//REMAINDER BASE <-> DEC
 
 let remBaseToDec (b:int) (n:string list) = match n with
     | [] -> 0.0
@@ -30,8 +32,8 @@ let remBaseToDec (b:int) (n:string list) = match n with
 
 let rec _decToBaseRem (t:string list) (b:float) (r:int) (n:float)  = 
     let x = n * b
-    let top = Seq.item (Math.Floor x |> int) symbols
-    if r = 0 then Seq.rev t
+    let top = symbols.[Math.Floor x |> int]
+    if r = 0 then List.rev t
     else (_decToBaseRem (top :: t) b (r - 1) (x % 1.0) )
 
 let decToBaseRem = _decToBaseRem []
